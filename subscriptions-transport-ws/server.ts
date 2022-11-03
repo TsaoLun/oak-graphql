@@ -1,4 +1,4 @@
-import * as WebSocket from 'https://cdn.pika.dev/ws@^7.3.0';
+import * as WebSocket from "https://cdn.skypack.dev/ws@%5E7.3.0";
 
 import MessageTypes from './message-types.ts';
 import isObject from './utils/is-object.ts';
@@ -10,7 +10,7 @@ import {
   GraphQLSchema
 } from '../deps.ts';
 import { createEmptyIterable } from './utils/empty-iterable.ts';
-import { createAsyncIterator, forAwaitEach, isAsyncIterable } from 'https://cdn.pika.dev/iterall@^1.3.0';
+import { createAsyncIterator, forAwaitEach, isAsyncIterable } from "https://cdn.skypack.dev/iterall@%5E1.3.0";
 import { isASubscriptionOperation } from './utils/is-subscriptions.ts';
 import { parseLegacyProtocolMessage } from './legacy/parse-legacy-protocol.ts';
 

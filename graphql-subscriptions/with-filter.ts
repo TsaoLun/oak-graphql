@@ -1,4 +1,4 @@
-import { $$asyncIterator } from "https://cdn.pika.dev/iterall@^1.3.0";
+import { $$asyncIterator } from "https://cdn.skypack.dev/iterall@%5E1.3.0";
 
 export type FilterFn = (rootValue?: any, args?: any, context?: any, info?: any) => boolean | Promise<boolean>;
 export type ResolverFn = (rootValue?: any, args?: any, context?: any, info?: any) => AsyncIterator<any>;
