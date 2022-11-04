@@ -1,5 +1,7 @@
 export { default as gql } from "./graphql-tag/index.ts";
 
+
+// Package Documentation: https://www.skypack.dev/view/graphql
 export {
   GraphQLEnumType,
   isSchema,
