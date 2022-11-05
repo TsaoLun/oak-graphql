@@ -1,5 +1,5 @@
 {
-    "tasks": {
-        "demo": "deno run --allow-net --unstable examples/server.ts"
-    }
+  "tasks": {
+    "demo": "deno run --allow-net --unstable examples/server.ts"
+  }
 }

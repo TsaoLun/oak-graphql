@@ -1,4 +1,4 @@
-import { applyGraphQL, gql, GQLError } from "../mod.ts";
+import { applyGraphQL, gql, type ResolversProps, Dataloader } from "../mod.ts";
 import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 
 const app = new Application();
@@ -7,6 +7,13 @@ const types = gql`
 type User {
   firstName: String
   lastName: String
+  "Hobbies"
+  hbs: [Hobby]
+}
+
+type Hobby {
+  name: String
+  method: String 
 }
 
 input UserInput {
@@ -26,40 +33,67 @@ type Mutation {
   setUser(input: UserInput!): ResolveType!
 }
 `;
-
-const resolvers = {
+let _loadCount = 0;
+const resolvers: ResolversProps = {
   Query: {
-    getUser: (parent: any, { id }: any, context: any, info: any) => {
-      console.log("id", id, context);
-      if(context.user === "Aaron") {
-        throw new GQLError({ type: "auth error in context" })
-      }
+    getUser: (parent, { id }, context, info) => {
+      // console.log("id", id, await context.request?.body().value);
       return {
         firstName: "wooseok",
         lastName: "lee",
+        hbs: ["football", "movie", "cakes", "games", "jobs"],
       };
     },
   },
   Mutation: {
-    setUser: (parent: any, { input: { firstName, lastName } }: any, context: any, info: any) => {
+    setUser: (parent, { input: { firstName, lastName } }, context, info) => {
       console.log("input:", firstName, lastName);
       return {
         done: true,
       };
     },
   },
+  Hobby: {
+    name: (parent) => {
+      return parent;
+    },
+    method: (parent) => {
+      _loadCount++;
+      return dataloader.load(parent);
+    },
+  },
 };
+
+const _data: Record<string, string> = {
+  "movie": "see",
+  "football": "play",
+  "cakes": "make",
+  "games": "play",
+  "jobs": "do",
+};
+
+const dataloader = new Dataloader<string, any>(
+  async (ids: Readonly<string[]>) => {
+    console.log(`Received ${ids} with count ${_loadCount}`);
+    _loadCount = 0;
+    return await new Promise((res, _) => {
+      setTimeout(() => {
+        const data = ids.map((e) => _data[e]);
+        res(data);
+      }, 500);
+    });
+  },
+);
 
 const GraphQLService = await applyGraphQL<Router>({
   Router,
   typeDefs: types,
   resolvers: resolvers,
   context: (ctx) => {
-      // this line is for passing a user context for the auth
-    return { user: "123" };
-  }
-})
-
+    // this line is for passing a user context for the auth
+    return ctx;
+  },
+});
 
 app.use(GraphQLService.routes(), GraphQLService.allowedMethods());
 

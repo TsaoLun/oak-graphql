@@ -1,5 +1,8 @@
-import { graphql, gql } from "./deps.ts";
-import { renderPlaygroundPage, ISettings } from "./graphql-playground-html/render-playground-html.ts";
+import { Context, gql, graphql } from "./deps.ts";
+import {
+  ISettings,
+  renderPlaygroundPage,
+} from "./graphql-playground-html/render-playground-html.ts";
 import { makeExecutableSchema } from "./graphql-tools/schema/makeExecutableSchema.ts";
 import { fileUploadMiddleware, GraphQLUpload } from "./fileUpload.ts";
 
@@ -17,15 +20,23 @@ export interface ApplyGraphQLOptions<T> {
   path?: string;
   typeDefs: any;
   resolvers: ResolversProps;
-  context?: (ctx: any) => any;
+  context?: (ctx: Partial<Context & unknown>) => any;
   usePlayground?: boolean;
   settings?: ISettings;
 }
 
 export interface ResolversProps {
-  Query?: any;
-  Mutation?: any;
-  [dynamicProperty: string]: any;
+  Query?: Record<string, ResolversFunc>;
+  Mutation?: Record<string, ResolversFunc>;
+  [dynamicProperty: string]: ResolveMap | undefined;
+}
+
+export interface ResolversFunc {
+  (parent: any, args: any, context: Partial<Context & unknown>, info: any): any;
+}
+
+interface ResolveMap {
+  [key: string]: ResolversFunc | ResolveMap;
 }
 
 export async function applyGraphQL<T>({
@@ -35,7 +46,7 @@ export async function applyGraphQL<T>({
   resolvers,
   context,
   usePlayground = true,
-  settings
+  settings,
 }: ApplyGraphQLOptions<T>): Promise<T> {
   const router = new Router();
 
@@ -43,7 +54,7 @@ export async function applyGraphQL<T>({
   augmentedTypeDefs.push(
     gql`
       scalar Upload
-    `
+    `,
   );
   if (Array.isArray(resolvers)) {
     if (resolvers.every((resolver) => !resolver.Upload)) {
@@ -51,7 +62,7 @@ export async function applyGraphQL<T>({
     }
   } else {
     if (resolvers && !resolvers.Upload) {
-      resolvers.Upload = GraphQLUpload;
+      resolvers.Upload = GraphQLUpload as any;
     }
   }
 
@@ -72,7 +83,7 @@ export async function applyGraphQL<T>({
           resolvers,
           contextResult,
           body.variables || undefined,
-          body.operationName || undefined
+          body.operationName || undefined,
         );
 
         response.status = 200;
@@ -105,7 +116,7 @@ export async function applyGraphQL<T>({
         const playground = renderPlaygroundPage({
           endpoint: request.url.origin + path,
           subscriptionEndpoint: request.url.origin,
-          settings
+          settings,
         });
         response.status = 200;
         response.body = playground;

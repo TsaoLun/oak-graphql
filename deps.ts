@@ -69,3 +69,5 @@ export {
 
 export { PubSub } from "./graphql-subscriptions/index.ts";
 export { MultipartReader } from "https://deno.land/std@0.143.0/mime/multipart.ts";
+export { type Context } from "https://deno.land/x/oak@v11.1.0/mod.ts";
+export { default as Dataloader } from "https://esm.sh/v96/dataloader@2.1.0"
